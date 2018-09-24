@@ -11,9 +11,34 @@ namespace main
     public delegate void PollCallBack(object[] updates);
     public class ThreadLongPollServer
     {
+        public struct FlagAbout
+        {
+            public string Short;
+            public string Full;
+
+            public FlagAbout(string s, string f)
+            {
+                Short = s;
+                Full = f;
+            }
+        }
+        public static Dictionary<long, FlagAbout> Flags = new Dictionary<long, FlagAbout>() {
+            { 1, new FlagAbout("UNREAD","Message is unread") },
+            { 2, new FlagAbout("OUTBOX","Message is outgoing") },
+            { 4, new FlagAbout("REPLIED","Message was answered") },
+            { 8, new FlagAbout("IMPORTANT","Message is marked as important") },
+            { 16, new FlagAbout("CHAT","Message sent via chat") },
+            { 32, new FlagAbout("FRIENDS","Message sent by a friend") },
+            { 64, new FlagAbout("SPAM","Message marked as \"Spam\"") },
+            { 128, new FlagAbout("DELЕTЕD","Message was deleted") },
+            { 256, new FlagAbout("FIXED","Message was user-checked for spam") },
+            { 512, new FlagAbout("MEDIA","Message has media content") },
+            { 65536, new FlagAbout("HIDDEN","Greeting message from a community. A dialog with such message should not be raisen in the list (show it only when a dialog has been opened directly). Flag is unavailable for versions < 2") }
+        };
+
         private getLongPollServer _poll;
         private PollCallBack _callback;
-        private Thread _threadLongPollServer;
+        private Thread _threadLongPollServer;   
         public ThreadLongPollServer(PollCallBack callback)
         {
             _threadLongPollServer = new Thread(ThreadMethod);
