@@ -32,7 +32,8 @@ namespace main
                 return (HttpWebResponse)request.GetResponse();
             });
             StreamReader str = new StreamReader(response.GetResponseStream());
-            return str.ReadToEnd();
+            var sR = str.ReadToEnd();
+            return sR;
         }
     }
 }

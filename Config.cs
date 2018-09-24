@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace main
 {
@@ -10,7 +6,7 @@ namespace main
     {
         internal static readonly int client_id = 3140623;
         internal static readonly string client_secret = "VeWdmVclDCtn6ihuP1nt";
-        internal static readonly string username = Environment.ExpandEnvironmentVariables("%VK_LOGIN%");
-        internal static readonly object password = Environment.ExpandEnvironmentVariables("%VK_PASSWORD%");
+        internal static readonly string username = Environment.GetEnvironmentVariable("VK_LOGIN", EnvironmentVariableTarget.User);
+        internal static readonly object password = Environment.GetEnvironmentVariable("VK_PASSWORD", EnvironmentVariableTarget.User);
     }
 }

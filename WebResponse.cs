@@ -10,9 +10,12 @@ namespace main
     {
         public struct WebOAuth
         {
-            public string access_token { get; }
-            public long expires_in { get; }
-            public long user_id { get; }
+            public string access_token;
+            public long expires_in;
+            public long user_id;
+            public Object error;
+            public bool isHasError() => error != null;
+            public override string ToString() => string.Format("access_token = {0}, expires_in = {1}, user_id = {2}", access_token, expires_in, user_id);
         }
     }
 }
