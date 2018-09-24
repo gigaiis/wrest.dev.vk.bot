@@ -1,27 +1,34 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Linq;
+using System.Threading;
 
 namespace main
 {
     public class Program
     {
+        public static long user_id;
+        public static string access_token;
+
+        public static ThreadLongPollServer threadLongPollServer;
+
+        private static void OnPoll(object[] updates)
+        {
+            foreach (var o in updates)
+                Console.WriteLine(string.Format("[{0}]{1}\r\n", DateTime.Now, ((JArray)o).ToString()));
+        }
+
         public static void Main(string[] args)
         {
             try
             {
-                var ResultWebOAuth = JsonConvert.DeserializeObject<WebResponse.WebOAuth>(
-                    Web.Navigate(
-                        string.Format(
-                            "https://oauth.vk.com/token?grant_type=password&client_id={0}1&client_secret={1}&username={2}&password={3}",
-                            Config.client_id,
-                            Config.client_secret,
-                            Config.username,
-                            Config.password
-                        )
-                    ).Result
-                );
-                if (ResultWebOAuth.isHasError()) throw new Exception(string.Format("Error OAuth: {0}", ResultWebOAuth.error));
-                else Console.WriteLine(ResultWebOAuth);
+                WebOAuth ResultWebOAuth = VKApi.Auth();
+
+                user_id = ResultWebOAuth.user_id;
+                access_token = ResultWebOAuth.access_token;
+
+                (threadLongPollServer = new ThreadLongPollServer(OnPoll)).Run();
             }
             catch (Exception ex)
             {
