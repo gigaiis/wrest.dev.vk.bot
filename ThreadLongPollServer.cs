@@ -51,7 +51,7 @@ namespace main
             while (_threadLongPollServer.ThreadState == ThreadState.Running)
             {
                 var poll = JsonConvert.DeserializeObject<PollResult>(Web.Navigate(string.Format(
-                    "https://{0}?act=a_check&key={1}&ts={2}&wait=25&access_token={3}",
+                    "https://{0}?act=a_check&key={1}&ts={2}&wait=25&mode=2&version=3&access_token={3}",
                     _poll.server,
                     _poll.key,
                     _poll.ts,
