@@ -38,7 +38,7 @@ namespace main
 
         private getLongPollServer _poll;
         private PollCallBack _callback;
-        private Thread _threadLongPollServer;   
+        private Thread _threadLongPollServer;
         public ThreadLongPollServer(PollCallBack callback)
         {
             _threadLongPollServer = new Thread(ThreadMethod);
@@ -47,40 +47,57 @@ namespace main
 
         private void ThreadMethod()
         {
-            _poll = VKApi.GetLongPollServer();
-            while (_threadLongPollServer.ThreadState == ThreadState.Running)
+            try
             {
-                var poll = JsonConvert.DeserializeObject<PollResult>(Web.Navigate(string.Format(
-                    "https://{0}?act=a_check&key={1}&ts={2}&wait=25&mode=2&version=3&access_token={3}",
-                    _poll.server,
-                    _poll.key,
-                    _poll.ts,
-                    Program.access_token
-                )).Result);
-                if (poll.isHasError())
+                _poll = VKApi.GetLongPollServer();
+                while (_threadLongPollServer.ThreadState == ThreadState.Running)
                 {
-                    if (poll.failed == 1) _poll.ts = poll.ts;
-                    else if (poll.failed == 2)
+                    try
                     {
-                        //"failed":2 — the key’s active period expired.
-                        //It's necessary to receive a key using the messages.getLongPollServer method.
-                        _poll = VKApi.GetLongPollServer();
+
+                        var poll = JsonConvert.DeserializeObject<PollResult>(Web.Navigate(string.Format(
+                            "https://{0}?act=a_check&key={1}&ts={2}&wait=25&mode=2&version=3&access_token={3}",
+                            _poll.server,
+                            _poll.key,
+                            _poll.ts,
+                            Program.access_token
+                        )).Result);
+                        if (poll.isHasError())
+                        {
+                            if (poll.failed == 1) _poll.ts = poll.ts;
+                            else if (poll.failed == 2)
+                            {
+                                //"failed":2 — the key’s active period expired.
+                                //It's necessary to receive a key using the messages.getLongPollServer method.
+                                _poll = VKApi.GetLongPollServer();
+                            }
+                            else if (poll.failed == 3)
+                            {
+                                //"failed":3 — user information was lost.
+                                //It's necessary to request a new key and ts with the help of the messages.getLongPollServer method.
+                                _poll = VKApi.GetLongPollServer();
+                            }
+                            else throw new Exception((poll.failed == 4) ?
+                              "An invalid version number was passed in the version parameter" :
+                              "Unknows error");
+                        }
+                        else if (poll.updates.Length > 0)
+                        {
+                            _poll.ts = poll.ts;
+                            _callback(poll.updates);
+                        }
+
                     }
-                    else if (poll.failed == 3)
+                    catch (Exception ex)
                     {
-                        //"failed":3 — user information was lost.
-                        //It's necessary to request a new key and ts with the help of the messages.getLongPollServer method.
-                        _poll = VKApi.GetLongPollServer();
+                        Console.WriteLine("EX[HREADPOLL]: {0}", ex.Message);
+                        Thread.Sleep(5000);
                     }
-                    else throw new Exception((poll.failed == 4) ?
-                      "An invalid version number was passed in the version parameter" :
-                      "Unknows error");
                 }
-                else if (poll.updates.Length > 0)
-                {
-                    _poll.ts = poll.ts;
-                    _callback(poll.updates);
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format("EXCEPTION[{0}][THREADPOLL]: {1}\r\n >>> {2}", DateTime.Now, ex.Message, ex.StackTrace));
             }
         }
         public void Run() => _threadLongPollServer.Start();

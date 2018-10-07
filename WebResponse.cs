@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,6 +31,30 @@ namespace main
         public long ts;
         public override string ToString() => string.Format("key = {0}, server = {1}, ts = {2}", key, server, ts);
 
+    }
+
+    public struct messages_search_obj
+    {
+        public long date;
+        public long from_id;
+        public long id;
+        [JsonProperty("out")]
+        public long _out;
+        public long peer_id;
+        public string text;
+        // public long "conversation_message_id": 214,
+        // public object[] "fwd_messages": [],
+        // "important": false,
+        // "random_id": 0,
+        // "attachments": [],
+        public bool is_hidden;
+        public override string ToString() => text;
+    }
+
+    public struct getMessagesSearch
+    {
+        public long count;
+        public messages_search_obj[] items;
     }
 
     public struct PollResult 
